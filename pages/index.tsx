@@ -129,7 +129,9 @@ export default function HomePage({ imageList }: { imageList: ImageItems }) {
               Delete Selected
             </button>
           </div>
-          <p className="text-center">Tap and hold to drag an image</p>
+          <p className="text-center text-lg font-semibold text-red-400">
+            Tap and hold to drag an image
+          </p>
           <div className="flex">
             <div className="px-3 sm:hidden"></div>
             <DndContext

@@ -8,6 +8,9 @@ type DropZoneProps = {
 const Dropzone = ({ onDrop }: DropZoneProps) => {
   const { acceptedFiles, getRootProps, getInputProps } = useDropzone({
     onDropAccepted: onDrop,
+    accept: {
+      "image/*": [],
+    },
   });
 
   return (
