@@ -1,58 +1,23 @@
 import Dropzone from "@/components/Dropzone";
-import {
-  useCallback,
-  useEffect,
-  useId,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-import { nanoid } from "nanoid";
+import { DragEndEvent, DragStartEvent } from "@dnd-kit/core";
+import { arrayMove } from "@dnd-kit/sortable";
 
-const randomId = () => nanoid();
-import {
-  DndContext,
-  closestCenter,
-  MouseSensor,
-  TouchSensor,
-  DragOverlay,
-  useSensor,
-  useSensors,
-  DragStartEvent,
-  UniqueIdentifier,
-  DragEndEvent,
-  PointerSensor,
-} from "@dnd-kit/core";
-import {
-  SortableContext,
-  arrayMove,
-  rectSortingStrategy,
-} from "@dnd-kit/sortable";
+import { useCallback, useState } from "react";
 
-import { restrictToWindowEdges } from "@dnd-kit/modifiers";
-import SortableItem, { Item } from "@/components/SortableItem";
-import ImageWrapper from "@/components/ImageWrapper";
+import DragAndDrop from "@/components/DragAndDrop";
 import Head from "next/head";
+import { mockImageList } from "@/mock/imageList.mock";
+import { randomId } from "@/utils/randomId";
 
 type ImageItem = {
   id: string;
   src: string;
   isSelected: boolean;
 };
-type ImageItems = ImageItem[];
+export type ImageItems = ImageItem[];
 
 export default function HomePage({ imageList }: { imageList: ImageItems }) {
   const [droppedImages, setDroppedImages] = useState<ImageItems>(imageList);
-
-  // const sensors = useSensors(useSensor(MouseSensor), useSensor(TouchSensor));
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        delay: 500,
-        tolerance: 5,
-      },
-    })
-  );
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const files = acceptedFiles.map((file) => ({
@@ -105,7 +70,6 @@ export default function HomePage({ imageList }: { imageList: ImageItems }) {
   const handleDragCancel = () => {
     setDragActiveIndex(null);
   };
-  const dndContextId = useId();
   return (
     <>
       <Head>
@@ -133,43 +97,17 @@ export default function HomePage({ imageList }: { imageList: ImageItems }) {
             Tap and hold to drag an image
           </p>
           <div className="flex">
+            {/* these are helpful for mobile devices to scroll viewport */}
             <div className="px-3 sm:hidden"></div>
-            <DndContext
-              id={dndContextId}
-              sensors={sensors}
-              collisionDetection={closestCenter}
-              onDragStart={handleDragStart}
-              onDragEnd={handleDragEnd}
-              onDragCancel={handleDragCancel}>
-              <SortableContext
-                items={droppedImages}
-                strategy={rectSortingStrategy}>
-                <div className="image__grid">
-                  {droppedImages.map((imageItem, imageItemIndex) => {
-                    const isFeatured = imageItemIndex === 0;
-                    return (
-                      <SortableItem
-                        key={imageItem.id}
-                        {...imageItem}
-                        isFeatured={isFeatured}
-                        toggleSelection={toggleSelection}
-                      />
-                    );
-                  })}
-                </div>
-              </SortableContext>
-              <DragOverlay
-                adjustScale
-                dropAnimation={{
-                  duration: 300,
-                  easing: "cubic-bezier(0.18, 0.67, 0.6, 1.22)",
-                }}
-                modifiers={[restrictToWindowEdges]}>
-                {typeof dragActiveIndex === "number" && dragActiveIndex >= 0 ? (
-                  <ImageWrapper {...droppedImages[dragActiveIndex]} />
-                ) : null}
-              </DragOverlay>
-            </DndContext>
+            <DragAndDrop
+              dragActiveIndex={dragActiveIndex}
+              handleDragCancel={handleDragCancel}
+              handleDragEnd={handleDragEnd}
+              handleDragStart={handleDragStart}
+              items={droppedImages}
+              toggleSelection={toggleSelection}
+            />
+            {/* these are helpful for mobile devices to scroll viewport */}
             <div className="px-3 sm:hidden"></div>
           </div>
         </div>
@@ -179,56 +117,9 @@ export default function HomePage({ imageList }: { imageList: ImageItems }) {
 }
 
 export function getServerSideProps() {
-  const imageList = [
-    {
-      id: randomId(),
-      src: "https://images.pexels.com/photos/17811/pexels-photo.jpg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-      isSelected: false,
-    },
-    {
-      id: randomId(),
-      src: "https://images.pexels.com/photos/1059823/pexels-photo-1059823.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-      isSelected: false,
-    },
-    {
-      id: randomId(),
-      src: "https://images.pexels.com/photos/731706/pexels-photo-731706.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-      isSelected: false,
-    },
-    {
-      id: randomId(),
-      src: "https://images.pexels.com/photos/145378/pexels-photo-145378.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-      isSelected: false,
-    },
-    {
-      id: randomId(),
-      src: "https://images.pexels.com/photos/689784/pexels-photo-689784.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-      isSelected: false,
-    },
-    {
-      id: randomId(),
-      src: "https://images.pexels.com/photos/1013335/pexels-photo-1013335.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-      isSelected: false,
-    },
-    {
-      id: randomId(),
-      src: "https://images.pexels.com/photos/11064121/pexels-photo-11064121.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-      isSelected: false,
-    },
-    {
-      id: randomId(),
-      src: "https://images.pexels.com/photos/11025915/pexels-photo-11025915.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-      isSelected: false,
-    },
-    {
-      id: randomId(),
-      src: "https://images.pexels.com/photos/1156507/pexels-photo-1156507.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
-      isSelected: false,
-    },
-  ];
   return {
     props: {
-      imageList,
+      imageList: mockImageList,
     },
   };
 }
