@@ -15,6 +15,7 @@ import ImageWrapper from "./ImageWrapper";
 import SortableItem from "./SortableItem";
 import { useId } from "react";
 import { ImageItems } from "@/pages";
+import { dragDelayTimeInMs, dragTolerance } from "@/utils/constants";
 
 type DragAndDropProps = {
   handleDragStart: (evt: DragStartEvent) => void;
@@ -37,8 +38,8 @@ const DragAndDrop = ({
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        delay: 500,
-        tolerance: 5,
+        delay: dragDelayTimeInMs,
+        tolerance: dragTolerance,
       },
     })
   );
