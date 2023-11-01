@@ -70,7 +70,6 @@ export default function HomePage({ imageList }: { imageList: ImageItems }) {
   // Find which items are selected
   // and toggle their selected state
   const toggleSelection = useCallback((id: string | number) => {
-    console.log("I am executing");
     setDroppedImages((p) => {
       const item = p.find((item) => item.id === id);
       if (item) {
