@@ -54,7 +54,7 @@ const DragAndDrop = ({
       <SortableContext
         items={items}
         strategy={rectSortingStrategy}>
-        <div className="image__grid">
+        <div className="image__grid select-none">
           {items.map((imageItem, imageItemIndex) => {
             const isFeatured = imageItemIndex === 0;
             return (
