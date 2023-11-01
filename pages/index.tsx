@@ -32,6 +32,7 @@ import {
 import { restrictToWindowEdges } from "@dnd-kit/modifiers";
 import SortableItem, { Item } from "@/components/SortableItem";
 import ImageWrapper from "@/components/ImageWrapper";
+import Head from "next/head";
 
 type ImageItem = {
   id: string;
@@ -107,67 +108,72 @@ export default function HomePage({ imageList }: { imageList: ImageItems }) {
   };
   const dndContextId = useId();
   return (
-    <main className="py-20 flex flex-col gap-10">
-      <div className="max-w-md  mx-auto px-5">
-        <Dropzone onDrop={onDrop} />
-      </div>
-      <div className=" max-w-6xl  mx-auto flex flex-col gap-5 px-5">
-        <div className="flex flex-col md:flex-row gap-3 justify-between items-center">
-          <p className="font-semibold text-xl">
-            Images selected {totalImageSelected}
-          </p>
-          <button
-            onClick={onDeleteSelected}
-            type="button"
-            disabled={totalImageSelected <= 0}
-            className="py-1 px-3 text-xs rounded-md bg-red-500 text-white hover:bg-red-600 enabled:active:translate-y-1 transition-transform
+    <>
+      <Head>
+        <title>A draggable image gallery</title>
+      </Head>
+      <main className="py-20 flex flex-col gap-10">
+        <div className="max-w-md  mx-auto px-5">
+          <Dropzone onDrop={onDrop} />
+        </div>
+        <div className=" max-w-6xl  mx-auto flex flex-col gap-5 px-5">
+          <div className="flex flex-col md:flex-row gap-3 justify-between items-center">
+            <p className="font-semibold text-xl">
+              Images selected {totalImageSelected}
+            </p>
+            <button
+              onClick={onDeleteSelected}
+              type="button"
+              disabled={totalImageSelected <= 0}
+              className="py-1 px-3 text-xs rounded-md bg-red-500 text-white hover:bg-red-600 enabled:active:translate-y-1 transition-transform
             disabled:bg-neutral-400 transition-none">
-            Delete Selected
-          </button>
+              Delete Selected
+            </button>
+          </div>
+          <p className="text-center">Tap and hold to drag an image</p>
+          <div className="flex">
+            <div className="px-3 sm:hidden"></div>
+            <DndContext
+              id={dndContextId}
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragStart={handleDragStart}
+              onDragEnd={handleDragEnd}
+              onDragCancel={handleDragCancel}>
+              <SortableContext
+                items={droppedImages}
+                strategy={rectSortingStrategy}>
+                <div className="image__grid">
+                  {droppedImages.map((imageItem, imageItemIndex) => {
+                    const isFeatured = imageItemIndex === 0;
+                    return (
+                      <SortableItem
+                        key={imageItem.id}
+                        {...imageItem}
+                        isFeatured={isFeatured}
+                        toggleSelection={toggleSelection}
+                      />
+                    );
+                  })}
+                </div>
+              </SortableContext>
+              <DragOverlay
+                adjustScale
+                dropAnimation={{
+                  duration: 300,
+                  easing: "cubic-bezier(0.18, 0.67, 0.6, 1.22)",
+                }}
+                modifiers={[restrictToWindowEdges]}>
+                {typeof dragActiveIndex === "number" && dragActiveIndex >= 0 ? (
+                  <ImageWrapper {...droppedImages[dragActiveIndex]} />
+                ) : null}
+              </DragOverlay>
+            </DndContext>
+            <div className="px-3 sm:hidden"></div>
+          </div>
         </div>
-        <p className="text-center">Tap and hold to drag an image</p>
-        <div className="flex">
-          <div className="px-3 sm:hidden"></div>
-          <DndContext
-            id={dndContextId}
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            onDragStart={handleDragStart}
-            onDragEnd={handleDragEnd}
-            onDragCancel={handleDragCancel}>
-            <SortableContext
-              items={droppedImages}
-              strategy={rectSortingStrategy}>
-              <div className="image__grid">
-                {droppedImages.map((imageItem, imageItemIndex) => {
-                  const isFeatured = imageItemIndex === 0;
-                  return (
-                    <SortableItem
-                      key={imageItem.id}
-                      {...imageItem}
-                      isFeatured={isFeatured}
-                      toggleSelection={toggleSelection}
-                    />
-                  );
-                })}
-              </div>
-            </SortableContext>
-            <DragOverlay
-              adjustScale
-              dropAnimation={{
-                duration: 300,
-                easing: "cubic-bezier(0.18, 0.67, 0.6, 1.22)",
-              }}
-              modifiers={[restrictToWindowEdges]}>
-              {typeof dragActiveIndex === "number" && dragActiveIndex >= 0 ? (
-                <ImageWrapper {...droppedImages[dragActiveIndex]} />
-              ) : null}
-            </DragOverlay>
-          </DndContext>
-          <div className="px-3 sm:hidden"></div>
-        </div>
-      </div>
-    </main>
+      </main>
+    </>
   );
 }
 
